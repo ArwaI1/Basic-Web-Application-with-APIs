@@ -1,0 +1,216 @@
+openapi: 3.0.0
+info:
+  title: Message API
+  description: An API for submitting and retrieving user messages.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /submit:
+    post:
+      summary: Submit a new message
+      description: |
+        This endpoint allows users to submit a message by providing their name, email, and the message itself.
+        The input data must be submitted as a JSON object containing the following fields:
+        - `name`: The name of the person submitting the message.
+        - `email`: The email address of the person.
+        - `message`: The content of the message.
+
+        If any of these fields are missing, the request will fail with a `400` Bad Request error.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Full name of the user submitting the message.
+                  example: Arwa Mater
+                email:
+                  type: string
+                  description: The email address of the user.
+                  example: arwa@example.com
+                message:
+                  type: string
+                  description: The content of the message the user wants to submit.
+                  example: "Hello, this is my message!"
+      responses:
+        '200':
+          description: |
+            Message successfully submitted. The server has processed the input and saved the message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Message submitted successfully."
+        '400':
+          description: |
+            Bad request. This response occurs when one or more fields (name, email, message) are missing or formatted incorrectly.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "All fields are required!"
+
+  /messages:
+    get:
+      summary: Get all messages
+      description: |
+        This endpoint retrieves all messages that have been submitted via the `/submit` endpoint.
+        It returns an array of objects, where each object contains:
+        - `id`: The unique ID of the message.
+        - `name`: The name of the person who submitted the message.
+        - `email`: The email address of the person.
+        - `message`: The content of the message.
+
+        This endpoint does not require any input parameters and can be accessed by any client to retrieve the list of messages.
+      responses:
+        '200':
+          description: |
+            A successful response that returns all the messages submitted to the server.
+            The messages are returned in a JSON array, where each message contains an `id`, `name`, `email`, and `message`.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: Unique identifier for the message.
+                      example: 1
+                    name:
+                      type: string
+                      description: Full name of the person who submitted the message.
+                      example: Arwa Mater
+                    email:
+                      type: string
+                      description: The email address of the person.
+                      example: arwa@example.com
+                    message:
+                      type: string
+                      description: The content of the submitted message.
+                      example: "This is a sample message."
+
+  /messages/{id}:
+    get:
+      summary: Get a message by ID
+      description: |
+        This endpoint retrieves a single message based on the message's unique ID. The client must provide the `id` as a path parameter.
+        
+        The response contains the details of the message with that specific `id`, including:
+        - `id`: The unique ID of the message.
+        - `name`: The name of the person who submitted the message.
+        - `email`: The email address of the person.
+        - `message`: The content of the message.
+
+        If the `id` is not found, the server will return a `404 Not Found` response.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the message to retrieve.
+      responses:
+        '200':
+          description: |
+            A successful response that returns the message with the specified `id`. The response includes the message's `id`, `name`, `email`, and `message`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Unique identifier for the message.
+                    example: 1
+                  name:
+                    type: string
+                    description: Full name of the person who submitted the message.
+                    example: Arwa Mater
+                  email:
+                    type: string
+                    description: The email address of the person.
+                    example: arwa@example.com
+                  message:
+                    type: string
+                    description: The content of the message.
+                    example: "This is a sample message."
+        '404':
+          description: |
+            Not found. This response occurs when there is no message with the given `id`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Message not found."
+
+  /delete/{id}:
+    delete:
+      summary: Delete a message by ID
+      description: |
+        This endpoint allows the client to delete a message by providing its unique `id` as a path parameter.
+        
+        If the message is successfully deleted, the server will respond with a confirmation message.
+        If the `id` is not found, the server will return a `404 Not Found` error.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the message to delete.
+      responses:
+        '200':
+          description: |
+            A successful response that confirms the message with the specified `id` has been deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Message deleted successfully."
+        '404':
+          description: |
+            Not found. This response occurs when there is no message with the given `id`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Message not found."
